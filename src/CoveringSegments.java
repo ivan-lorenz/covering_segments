@@ -28,31 +28,44 @@ public class CoveringSegments {
         return convertToArrayFromSet(points);
     }
 
-    public static int[] optimalPointsList(Segment[] segments) {
+    public static int[] optimalPointsFast(Segment[] segments) {
 
-        List<Integer> points = new ArrayList<>();
+        Set<Integer> points = new LinkedHashSet<>();
         Arrays.sort(segments, Comparator.comparingInt(o -> o.start));
+
+        Set<Integer> pointsToVisit = new LinkedHashSet<>();
+        for (int i = 0; i < segments.length; i++) {
+            pointsToVisit.add(segments[i].start);
+            pointsToVisit.add(segments[i].end);
+        }
+        List<Integer> pointsToVisitOrdered = new ArrayList<>(pointsToVisit);
+        Collections.sort(pointsToVisitOrdered);
 
         for (int i= 0; i < segments.length; i++) {
             int[] candidatePoint = new int[]{-1 ,0};
             int current = i;
-            for (int j = segments[current].start; j <= segments[current].end; j++) {
+            int pointToVisitIndex = 0;
+
+            while(pointToVisitIndex < pointsToVisit.size() && pointsToVisitOrdered.get(pointToVisitIndex) != segments[current].start)
+                pointToVisitIndex++;
+
+            while(pointToVisitIndex < pointsToVisit.size() && pointsToVisitOrdered.get(pointToVisitIndex) <= segments[current].end) {
                 int segmentsCovered = 1;
                 for (int s = current + 1; s < segments.length; s++) {
-                    if (isSegmentCovered(j, segments[s])) {
+                    if (isSegmentCovered(pointsToVisitOrdered.get(pointToVisitIndex), segments[s])) {
                         segmentsCovered++;
                         i = s;
                     } else {
                         break;
                     }
                 }
-                updateCandidatePointIfMax(candidatePoint, j, segmentsCovered);
+                updateCandidatePointIfMax(candidatePoint, pointsToVisitOrdered.get(pointToVisitIndex), segmentsCovered);
+                pointToVisitIndex++;
             }
-            if (points.size() == 0 || points.get(points.size() - 1) != candidatePoint[0])
-                points.add(candidatePoint[0]);
+            points.add(candidatePoint[0]);
         }
 
-        return points.stream().mapToInt(Integer::intValue).toArray();
+        return convertToArrayFromSet(points);
     }
 
     private static void updateCandidatePointIfMax(int[] candidatePoint, int point, int segmentsCovered) {
@@ -98,7 +111,7 @@ public class CoveringSegments {
             end = scanner.nextInt();
             segments[i] = new Segment(start, end);
         }
-        int[] points = optimalPoints(segments);
+        int[] points = optimalPointsFast(segments);
         System.out.println(points.length);
         for (int point : points) {
             System.out.print(point + " ");

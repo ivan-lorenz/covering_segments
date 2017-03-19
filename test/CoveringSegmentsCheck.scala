@@ -17,7 +17,7 @@ object CoveringSegmentsCheck extends Properties("CoveringSegments"){
 
   property("minimum points should be only less than total segments points") =
     forAll(listOfSegments){segments  =>
-      val assertion = CoveringSegments.optimalPointsList(segments).length <= segments.length * 2
+      val assertion = CoveringSegments.optimalPointsFast(segments).length <= segments.length * 2
       if (!assertion)
         System.out.println(s"ERROR for segments -> ${segments.mkString(",")} ")
       assertion
@@ -26,7 +26,7 @@ object CoveringSegmentsCheck extends Properties("CoveringSegments"){
   property("both solutions shoub be equivalent") =
     forAll(listOfSegments){segments  =>
       val naive = CoveringSegments.optimalPoints(segments)
-      val fast = CoveringSegments.optimalPointsList(segments)
+      val fast = CoveringSegments.optimalPointsFast(segments)
       val assertion = naive sameElements fast
       if (!assertion)
         System.out.println(s"ERROR for segments -> ${segments.mkString(",")} ")
@@ -35,7 +35,7 @@ object CoveringSegmentsCheck extends Properties("CoveringSegments"){
 
   property("there is no repeated point") =
     forAll(listOfSegments){segments  =>
-      val result = CoveringSegments.optimalPointsList(segments)
+      val result = CoveringSegments.optimalPointsFast(segments)
       val assertion = result.toSet.size == result.length
       if (!assertion)
         System.out.println(s"ERROR for segments -> ${segments.mkString(",")} ")
